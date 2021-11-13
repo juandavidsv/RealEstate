@@ -19,14 +19,31 @@ namespace WebApi.Test.UnitTests
         {
             var nombreBD = Guid.NewGuid().ToString();
             var contexto = ConstruirContext(nombreBD);
-            
+
             var content = Encoding.UTF8.GetBytes("test image");
-            byte[] imag = { 0x1, 0x2, 0x3, 0x4, 0x5 };
+            var file = new FormFile(new MemoryStream(content), 0, content.Length, "Data", "imagen.jpg");
+            file.Headers = new HeaderDictionary();
+            file.ContentType = "image/jpg";
+
+            var property = new PropertyDTO()
+            {
+                Name = "farm",
+                Address = "Av 50",
+                Price = 50000,
+                CodeInternal = "001",
+                Year = 2010,
+                IdOwner = 1,
+            };
+
+
+            var controllerPro = new PropertiesController(contexto);
+            var ResultPro =controllerPro.PostProperty(property);   
+
             var propertyImageDTO = new PropertyImageDTO()
             {
                 IdProperty = 1,
                 Enabled = true,
-                File = imag
+                File = file
             };
 
             var controller = new PropertyImagesController(contexto);

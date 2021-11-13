@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -66,20 +67,34 @@ namespace WebApi.Controllers
         // POST: api/PropertyImages
 
         [HttpPost]
-        public async Task<ActionResult<PropertyImage>> PostPropertyImage(PropertyImageDTO propertyImageDTO)
+        public async Task<ActionResult<PropertyImage>> PostPropertyImage([FromForm] PropertyImageDTO propertyImageDTO)
         {
+            var property = await _context.Properties.FirstOrDefaultAsync(x => x.IdProperty == propertyImageDTO.IdProperty);
+
+            if (property == null || propertyImageDTO.File == null) { return NotFound(); }
+
+            byte[] contenido = new byte[]{};
+            if (propertyImageDTO.File != null)
+            {
+                using (var memoryStream = new MemoryStream())
+                {
+                    await propertyImageDTO.File.CopyToAsync(memoryStream);
+                     contenido = memoryStream.ToArray();
+                }
+            }
 
             PropertyImage propertyImage = new PropertyImage()
             {
                 IdProperty = propertyImageDTO.IdProperty,
-                File =  propertyImageDTO.File,
-                Enabled =  propertyImageDTO.Enabled,
+                Enabled = propertyImageDTO.Enabled,
+                File = contenido
             };
             _context.PropertyImages.Add(propertyImage);
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetPropertyImage", new { id = propertyImage.IdPropertyImage }, propertyImage);
         }
+
 
     }
 }

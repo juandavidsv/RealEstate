@@ -1,6 +1,8 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Http;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using WebApi.Validation;
 
 #nullable disable
 
@@ -12,7 +14,9 @@ namespace WebApi.DTOs
         [Required]
         public int IdProperty { get; set; }
         [Required]
-        public byte[] File { get; set; }
+        [FileSizeValidation(4)]
+        [FileTypeValidation(FileType.image)]
+        public IFormFile File { get; set; }
        
         public bool Enabled { get; set; }
 
